@@ -1,37 +1,43 @@
 from flask import Flask, request, jsonify
-import openai
 import os
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
+from azure.identity import DefaultAzureCredential
+from azure.ai.openai import OpenAIClient
 
 app = Flask(__name__)
 
-# Configure OpenAI API Key from .env
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Load environment variables
+AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
+AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")
+AZURE_OPENAI_DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
+
+# Create OpenAI client
+credential = DefaultAzureCredential()
+openai_client = OpenAIClient(endpoint=AZURE_OPENAI_ENDPOINT, credential=credential)
 
 @app.route("/chat", methods=["POST"])
 def chat():
     try:
         data = request.json
         prompt = data.get("prompt", "")
-        
+
         if not prompt:
             return jsonify({"error": "Prompt is required"}), 400
-        
-        # Call OpenAI API
-        response = openai.Completion.create(
-            engine="text-davinci-003",
+
+        # Call Azure OpenAI API
+        response = openai_client.get_completions(
+            deployment_id=AZURE_OPENAI_DEPLOYMENT_NAME,
             prompt=prompt,
             max_tokens=150,
-            temperature=0.7,
+            temperature=0.7
         )
-        
-        return jsonify({"response": response["choices"][0]["text"].strip()})
+
+        # Extract the response text
+        response_text = response.choices[0].text.strip()
+
+        return jsonify({"response": response_text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    port = int(os.getenv("FLASK_APP_PORT", 8080))
+    port = int(os.getenv("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
