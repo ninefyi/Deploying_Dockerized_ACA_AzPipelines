@@ -1,0 +1,26 @@
+{
+  "name": "Chat AI Dev Container",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.formatting.provider": "black",
+        "editor.formatOnSave": true
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-azuretools.vscode-docker",
+        "streetsidesoftware.code-spell-checker",
+        "hashicorp.terraform"
+      ]
+    }
+  },
+  "forwardPorts": [8080, 8501],
+  "postCreateCommand": "pip install -r /workspace/app/requirements.txt",
+  "remoteUser": "vscode"
+}

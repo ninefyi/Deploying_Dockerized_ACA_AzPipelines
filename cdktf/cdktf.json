@@ -1,0 +1,9 @@
+{
+    "language": "python",
+    "app": "python main.py",
+    "terraformProviders": [
+        "azurerm@~> 3.0"
+    ],
+    "terraformModules": [],
+    "codeMakerOutput": "imports"
+}

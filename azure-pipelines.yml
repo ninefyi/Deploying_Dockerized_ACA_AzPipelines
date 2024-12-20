@@ -1,0 +1,113 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
+
+variables:
+  # Docker image names
+  backend_image_name: "backend"
+  frontend_image_name: "frontend"
+
+  # ACR and Azure settings
+  acr_login_server: "<your-acr-name>.azurecr.io"  # Replace with your ACR login server
+  resource_group: "<your-resource-group>"        # Replace with your Azure resource group
+  backend_app_name: "backend-app"                # Replace with your Azure Container App name for the backend
+  frontend_app_name: "frontend-app"              # Replace with your Azure Container App name for the frontend
+
+stages:
+  - stage: BuildAndPush
+    displayName: "Build and Push Docker Images"
+    jobs:
+      - job: BuildAndPush
+        displayName: "Build and Push Docker Images"
+        pool:
+          vmImage: "ubuntu-latest"
+
+        steps:
+          # Checkout code
+          - task: Checkout@v2
+            displayName: "Checkout Code"
+
+          # Set up Python environment and install dependencies
+          - task: UsePythonVersion@0
+            displayName: "Set up Python"
+            inputs:
+              versionSpec: "3.9"
+
+          - script: |
+              pip install -r app/requirements.txt
+              pip install pytest
+            displayName: "Install Dependencies"
+
+          # Run tests
+          - script: |
+              pytest
+            displayName: "Run Tests"
+
+          # Log in to Azure Container Registry
+          - task: Docker@2
+            displayName: "Log in to Azure Container Registry"
+            inputs:
+              command: login
+              containerRegistry: "<your-acr-service-connection>"  # Replace with ACR service connection name
+
+          # Build and push backend Docker image
+          - task: Docker@2
+            displayName: "Build and Push Backend Docker Image"
+            inputs:
+              command: buildAndPush
+              repository: "$(acr_login_server)/$(backend_image_name)"
+              dockerfile: "app/Dockerfile"
+              tags: "latest"
+              buildContext: "."
+
+          # Build and push frontend Docker image
+          - task: Docker@2
+            displayName: "Build and Push Frontend Docker Image"
+            inputs:
+              command: buildAndPush
+              repository: "$(acr_login_server)/$(frontend_image_name)"
+              dockerfile: "app/Dockerfile"
+              tags: "latest"
+              buildContext: "."
+
+  - stage: Deploy
+    displayName: "Deploy to Azure Container Apps"
+    dependsOn: BuildAndPush
+    jobs:
+      - job: Deploy
+        displayName: "Deploy to Azure Container Apps"
+        pool:
+          vmImage: "ubuntu-latest"
+
+        steps:
+          # Azure login
+          - task: AzureCLI@2
+            displayName: "Azure Login"
+            inputs:
+              azureSubscription: "<your-azure-service-connection>"  # Replace with Azure service connection name
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                echo "Logged in to Azure"
+
+          # Deploy backend app
+          - script: |
+              az containerapp update \
+                --name $(backend_app_name) \
+                --resource-group $(resource_group) \
+                --image $(acr_login_server)/$(backend_image_name):latest
+            displayName: "Deploy Backend App"
+
+          # Deploy frontend app
+          - script: |
+              az containerapp update \
+                --name $(frontend_app_name) \
+                --resource-group $(resource_group) \
+                --image $(acr_login_server)/$(frontend_image_name):latest
+            displayName: "Deploy Frontend App"
