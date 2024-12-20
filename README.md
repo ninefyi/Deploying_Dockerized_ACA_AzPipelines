@@ -3,6 +3,7 @@
 # Run below command to set up CDKTF
 ```bash
 source ~/.bashrc && nvm install --lts && npm install -g cdktf-cli
+cdktf --version
 ```
 
 # Create ENV files
