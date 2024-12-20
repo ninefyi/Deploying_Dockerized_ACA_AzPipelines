@@ -1,8 +1,16 @@
 # Deploying Dockerized AI App in Azure Container Apps using Azure Pipelines
 
+# Run below command to set up CDKTF
+```bash
+source ~/.bashrc && nvm install --lts && npm install -g cdktf-cli
+```
+
+# Create ENV files
 File: /app/.env
 ```bash
-OPENAI_API_KEY=your_openai_api_key_here
+AZURE_OPENAI_ENDPOINT=
+AZURE_OPENAI_KEY=
+AZURE_OPENAI_DEPLOYMENT_NAME=
 FLASK_APP_PORT=8080
 STREAMLIT_PORT=8501
 ```

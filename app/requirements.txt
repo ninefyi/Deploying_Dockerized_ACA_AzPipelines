@@ -3,5 +3,3 @@ openai
 streamlit
 requests
 python-dotenv
-azure-identity
-azure-ai-openai

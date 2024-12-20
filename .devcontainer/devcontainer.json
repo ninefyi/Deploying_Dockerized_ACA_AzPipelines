@@ -20,7 +20,9 @@
       ]
     }
   },
-  "forwardPorts": [8080, 8501],
-  "postCreateCommand": "pip install -r /workspace/app/requirements.txt",
+  "forwardPorts": [
+    8080,
+    8501
+  ],
   "remoteUser": "vscode"
 }

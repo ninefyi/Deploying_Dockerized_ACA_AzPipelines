@@ -27,9 +27,6 @@ RUN apt update && sudo apt install -y terraform
 
 # Install CDKTF
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
-RUN source ~/.bashrc
-RUN nvm install --lts  # Recommended Node.js version
-RUN npm install -g cdktf-cli
 
 # Expose ports for backend and frontend
 EXPOSE 8080 8501
