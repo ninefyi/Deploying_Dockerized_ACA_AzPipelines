@@ -16,7 +16,8 @@
         "ms-python.vscode-pylance",
         "ms-azuretools.vscode-docker",
         "streetsidesoftware.code-spell-checker",
-        "hashicorp.terraform"
+        "hashicorp.terraform",
+        "GitHub.copilot"
       ]
     }
   },
