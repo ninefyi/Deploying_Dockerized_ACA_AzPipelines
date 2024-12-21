@@ -1,107 +1,51 @@
-trigger:
-  branches:
-    include:
-      - main
+pool:
+  name: Azure Pipelines
+  vmImage: 'ubuntu-latest'
+steps:
+- task: UsePythonVersion@0
+  displayName: 'Use Python 3.9'
+  inputs:
+    versionSpec: 3.9
 
-pr:
-  branches:
-    include:
-      - main
+- script: 'pip install -r api/requirements.txt'
+  displayName: 'Install Dependencies'
 
-variables:
-  # Docker image names
-  backend_image_name: "api"
-  frontend_image_name: "web"
+- task: Docker@2
+  displayName: 'Log in to Azure Container Registry'
+  inputs:
+    containerRegistry: 'fyioai-svc'
+    command: login
 
-  # ACR and Azure settings
-  acr_login_server: "fyioai.azurecr.io"  # Replace with your ACR login server
-  resource_group: "r"        # Replace with your Azure resource group
-  backend_app_name: "backend-app"                # Replace with your Azure Container App name for the backend
-  frontend_app_name: "frontend-app"              # Replace with your Azure Container App name for the frontend
+- task: Docker@2
+  displayName: 'Build and Push API Docker Image'
+  inputs:
+    containerRegistry: 'fyioai-svc'
+    Dockerfile: api/Dockerfile
+    tags: '$(git rev-parse HEAD)'
 
-stages:
-  - stage: BuildAndPush
-    displayName: "Build and Push Docker Images"
-    jobs:
-      - job: BuildAndPush
-        displayName: "Build and Push Docker Images"
-        pool:
-          vmImage: "ubuntu-latest"
+- task: Docker@2
+  displayName: 'Build and Push Web Docker Image'
+  inputs:
+    containerRegistry: 'fyioai-svc'
+    Dockerfile: web/Dockerfile
+    tags: '$(git rev-parse HEAD)'
 
-        steps:
-          # Checkout code
-          - task: Checkout@v2
-            displayName: "Checkout Code"
+- task: AzureCLI@2
+  displayName: 'Deploy API'
+  inputs:
+    azureSubscription: 'rg-mvp-jpeast-svc'
+    scriptType: batch
+    scriptLocation: inlineScript
+    inlineScript: |
+     export GITHUB_SHA=$(git rev-parse HEAD)
+     az containerapp update --name $(AZ_ACA_API) --resource-group $(AZ_RG) --image $(AZ_ACR_URL)/$(AZ_ACR_API):$(GITHUB_SHA)
 
-          # Set up Python environment and install dependencies
-          - task: UsePythonVersion@0
-            displayName: "Set up Python"
-            inputs:
-              versionSpec: "3.9"
-
-          - script: |
-              pip install -r app/requirements.txt
-            displayName: "Install Dependencies"
-
-          # Log in to Azure Container Registry
-          - task: Docker@2
-            displayName: "Log in to Azure Container Registry"
-            inputs:
-              command: login
-              containerRegistry: "<your-acr-service-connection>"  # Replace with ACR service connection name
-
-          # Build and push backend Docker image
-          - task: Docker@2
-            displayName: "Build and Push Backend Docker Image"
-            inputs:
-              command: buildAndPush
-              repository: "$(acr_login_server)/$(backend_image_name)"
-              dockerfile: "app/Dockerfile"
-              tags: "latest"
-              buildContext: "."
-
-          # Build and push frontend Docker image
-          - task: Docker@2
-            displayName: "Build and Push Frontend Docker Image"
-            inputs:
-              command: buildAndPush
-              repository: "$(acr_login_server)/$(frontend_image_name)"
-              dockerfile: "app/Dockerfile"
-              tags: "latest"
-              buildContext: "."
-
-  - stage: Deploy
-    displayName: "Deploy to Azure Container Apps"
-    dependsOn: BuildAndPush
-    jobs:
-      - job: Deploy
-        displayName: "Deploy to Azure Container Apps"
-        pool:
-          vmImage: "ubuntu-latest"
-
-        steps:
-          # Azure login
-          - task: AzureCLI@2
-            displayName: "Azure Login"
-            inputs:
-              azureSubscription: "<your-azure-service-connection>"  # Replace with Azure service connection name
-              scriptType: bash
-              scriptLocation: inlineScript
-              inlineScript: |
-                echo "Logged in to Azure"
-
-          # Deploy backend app
-          - script: |
-              az containerapp update \
-                --name $(backend_app_name) \
-                --resource-group $(resource_group) \
-                --image $(acr_login_server)/$(backend_image_name):latest
-            displayName: "Deploy Backend App"
-
-          # Deploy frontend app
-          - script: |
-              az containerapp update \
-                --name $(frontend_app_name) \
-                --resource-group $(resource_group) \
-                --image $(acr_login_server)/$(frontend_image_name):latest
-            displayName: "Deploy Frontend App"
+- task: AzureCLI@2
+  displayName: 'Deploy Web'
+  inputs:
+    azureSubscription: 'rg-mvp-jpeast-svc'
+    scriptType: batch
+    scriptLocation: inlineScript
+    inlineScript: |
+     export GITHUB_SHA=$(git rev-parse HEAD)
+     az containerapp update --name $(AZ_ACA_WEB) --resource-group $(AZ_RG) --image $(AZ_ACR_URL)/$(AZ_ACR_WEB):$(GITHUB_SHA)
