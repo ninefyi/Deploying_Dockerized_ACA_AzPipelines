@@ -17,16 +17,16 @@ COPY app/requirements.txt /workspace/app/requirements.txt
 # Install Python dependencies
 RUN pip install --no-cache-dir -r /workspace/app/requirements.txt
 
-# Install additional tools (optional)
-RUN pip install pytest black
-
 # Install Terraform
 RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 RUN echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
 RUN apt update && sudo apt install -y terraform
 
 # Install CDKTF
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+
+# Install Azure CLI
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
 # Expose ports for backend and frontend
 EXPOSE 8080 8501

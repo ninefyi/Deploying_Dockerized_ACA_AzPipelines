@@ -25,5 +25,6 @@
     8080,
     8501
   ],
+  "postCreateCommand": "bash -i -c 'source ~/.bashrc && nvm install --lts && npm install -g cdktf-cli'",
   "remoteUser": "vscode"
 }
