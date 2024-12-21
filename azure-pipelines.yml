@@ -2,6 +2,16 @@ pool:
   name: Azure Pipelines
   vmImage: 'ubuntu-latest'
 steps:
+- script: |
+   touch .env
+   echo "AZURE_OPENAI_ENDPOINT=$(AZURE_OPENAI_ENDPOINT)" >> .env
+   echo "AZURE_OPENAI_API_KEY =$(AZURE_OPENAI_API_KEY)" >> .env
+   echo "AZURE_OPENAI_DEPLOYMENT_NAME=$(AZURE_OPENAI_DEPLOYMENT_NAME)" >> .env
+   echo "FLASK_APP_PORT=$(FLASK_APP_PORT)" >> .env
+   echo "STREAMLIT_PORT=$(STREAMLIT_PORT)" >> .env
+  workingDirectory: api
+  displayName: 'Write VAR to .env file'
+
 - task: UsePythonVersion@0
   displayName: 'Use Python 3.9'
   inputs:
@@ -20,32 +30,32 @@ steps:
   displayName: 'Build and Push API Docker Image'
   inputs:
     containerRegistry: 'fyioai-svc'
+    repository: api
     Dockerfile: api/Dockerfile
-    tags: '$(git rev-parse HEAD)'
+    buildContext: api
+    tags: '$(Build.SourceVersion)'
 
 - task: Docker@2
   displayName: 'Build and Push Web Docker Image'
   inputs:
     containerRegistry: 'fyioai-svc'
+    repository: web
     Dockerfile: web/Dockerfile
-    tags: '$(git rev-parse HEAD)'
+    buildContext: web
+    tags: '$(Build.SourceVersion)'
 
 - task: AzureCLI@2
   displayName: 'Deploy API'
   inputs:
     azureSubscription: 'rg-mvp-jpeast-svc'
-    scriptType: batch
+    scriptType: bash
     scriptLocation: inlineScript
-    inlineScript: |
-     export GITHUB_SHA=$(git rev-parse HEAD)
-     az containerapp update --name $(AZ_ACA_API) --resource-group $(AZ_RG) --image $(AZ_ACR_URL)/$(AZ_ACR_API):$(GITHUB_SHA)
+    inlineScript: 'az containerapp update --name $(AZ_ACA_API) --resource-group $(AZ_RG) --image $(AZ_ACR_URL)/$(AZ_ACR_API):$(Build.SourceVersion)'
 
 - task: AzureCLI@2
   displayName: 'Deploy Web'
   inputs:
     azureSubscription: 'rg-mvp-jpeast-svc'
-    scriptType: batch
+    scriptType: bash
     scriptLocation: inlineScript
-    inlineScript: |
-     export GITHUB_SHA=$(git rev-parse HEAD)
-     az containerapp update --name $(AZ_ACA_WEB) --resource-group $(AZ_RG) --image $(AZ_ACR_URL)/$(AZ_ACR_WEB):$(GITHUB_SHA)
+    inlineScript: 'az containerapp update --name $(AZ_ACA_WEB) --resource-group $(AZ_RG) --image $(AZ_ACR_URL)/$(AZ_ACR_WEB):$(Build.SourceVersion)'

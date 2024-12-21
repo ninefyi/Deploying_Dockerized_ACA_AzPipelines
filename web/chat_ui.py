@@ -1,17 +1,12 @@
 import streamlit as st
 import requests
 import os
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
 
 # Chat API endpoint
 API_URL = f"https://fyioai-api.redriver-a1974794.japaneast.azurecontainerapps.io/chat"
 
 if "CODESPACE_NAME" in os.environ:
     API_URL = f"https://{os.environ['CODESPACE_NAME']}-8080.app.github.dev/chat"
-
 
 # Streamlit configuration
 st.set_page_config(page_title="Chat AI Revision 1", layout="centered")
