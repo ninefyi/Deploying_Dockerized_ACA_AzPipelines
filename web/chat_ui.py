@@ -14,10 +14,10 @@ if "CODESPACE_NAME" in os.environ:
 
 
 # Streamlit configuration
-st.set_page_config(page_title="Chat AI", layout="centered")
+st.set_page_config(page_title="Chat AI Revision 1", layout="centered")
 
 # Application title
-st.title("Chat AI")
+st.title("Chat AI Revision 1")
 
 # Initialize chat history
 if "messages" not in st.session_state:

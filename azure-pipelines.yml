@@ -10,12 +10,12 @@ pr:
 
 variables:
   # Docker image names
-  backend_image_name: "backend"
-  frontend_image_name: "frontend"
+  backend_image_name: "api"
+  frontend_image_name: "web"
 
   # ACR and Azure settings
-  acr_login_server: "<your-acr-name>.azurecr.io"  # Replace with your ACR login server
-  resource_group: "<your-resource-group>"        # Replace with your Azure resource group
+  acr_login_server: "fyioai.azurecr.io"  # Replace with your ACR login server
+  resource_group: "r"        # Replace with your Azure resource group
   backend_app_name: "backend-app"                # Replace with your Azure Container App name for the backend
   frontend_app_name: "frontend-app"              # Replace with your Azure Container App name for the frontend
 

@@ -20,10 +20,22 @@ az acr login -n <CONTAINER_REGISTRY_NAME> --expose-token
 
 ```bash
 cd web
-az acr build -r <CONTAINER_REGISTRY_NAME> --image web:v1 .
+export GITHUB_SHA=$(git rev-parse HEAD)
+export AZ_ACA="fyioai-web"
+export AZ_RG="rg-mvp-jpeast"
+export AZ_ACR="fyioai"
+export AZ_IMG="web"
+az acr build -r ${AZ_ACR} --image ${AZ_IMG}:${GITHUB_SHA} .
+az containerapp update --name ${AZ_ACA} --resource-group ${AZ_RG}$ --image ${AZ_ACR}$.azurecr.io/${AZ_IMG}:${GITHUB_SHA}
 ```
 
 ```bash
 cd api
-az acr build -r <CONTAINER_REGISTRY_NAME> --image api:v1 .
+export GITHUB_SHA=$(git rev-parse HEAD)
+export AZ_ACA="fyioai-api"
+export AZ_RG="rg-mvp-jpeast"
+export AZ_ACR="fyioai"
+export AZ_IMG="api"
+az acr build -r ${AZ_ACR} --image ${AZ_IMG}:${GITHUB_SHA} .
+az containerapp update --name ${AZ_ACA} --resource-group ${AZ_RG}$ --image ${AZ_ACR}$.azurecr.io/${AZ_IMG}:${GITHUB_SHA}
 ```
