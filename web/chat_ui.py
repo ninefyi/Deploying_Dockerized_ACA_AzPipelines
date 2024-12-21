@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Chat API endpoint
-API_URL = f"http://fyioai-api:{os.getenv('FLASK_APP_PORT', 8080)}/chat"
+API_URL = f"https://fyioai-api.redriver-a1974794.japaneast.azurecontainerapps.io/chat"
 
 if "CODESPACE_NAME" in os.environ:
     API_URL = f"https://{os.environ['CODESPACE_NAME']}-8080.app.github.dev/chat"
