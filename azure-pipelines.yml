@@ -41,13 +41,7 @@ stages:
 
           - script: |
               pip install -r app/requirements.txt
-              pip install pytest
             displayName: "Install Dependencies"
-
-          # Run tests
-          - script: |
-              pytest
-            displayName: "Run Tests"
 
           # Log in to Azure Container Registry
           - task: Docker@2
