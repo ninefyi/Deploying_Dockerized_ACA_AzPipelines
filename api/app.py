@@ -22,6 +22,11 @@ client = AzureOpenAI(
 )
 
 
+@app.route("/hello", methods=["GET"])
+def hello():
+    return jsonify({"message": "Hello, world!"})
+
+
 @app.route("/chat", methods=["POST"])
 def chat():
     try:
