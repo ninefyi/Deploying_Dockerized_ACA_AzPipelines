@@ -11,11 +11,11 @@ RUN apt-get update && apt-get install -y \
     vim \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copy application requirements (Python dependencies)
-COPY app/requirements.txt /workspace/app/requirements.txt
+# Copy required requirements (Python dependencies)
+COPY web/requirements.txt /workspace/web/requirements.txt
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r /workspace/app/requirements.txt
+RUN pip install --no-cache-dir -r /workspace/web/requirements.txt
 
 # Install Terraform
 RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg

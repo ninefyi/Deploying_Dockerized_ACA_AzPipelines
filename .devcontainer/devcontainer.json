@@ -17,7 +17,8 @@
         "ms-azuretools.vscode-docker",
         "streetsidesoftware.code-spell-checker",
         "hashicorp.terraform",
-        "GitHub.copilot"
+        "GitHub.copilot",
+        "stateful.runme"
       ]
     }
   },
